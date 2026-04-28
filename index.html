@@ -195,6 +195,177 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:var(--green2);
   .race-banner-orange{font-size:20px;padding:12px 10px}
   .honmei-row{padding:8px 10px;gap:6px}
 }
+
+/* ===== ヒーロー（◎本命） ===== */
+.hero-card{
+  background:linear-gradient(135deg,#0a5d2e 0%,#1a8050 60%,#2bb072 100%);
+  color:#fff;border-radius:var(--radius-lg);
+  padding:18px 18px 16px;margin-bottom:10px;
+  position:relative;overflow:hidden;
+  box-shadow:0 6px 18px rgba(10,93,46,.28);
+}
+.hero-card::before{
+  content:'';position:absolute;top:-40px;right:-40px;
+  width:170px;height:170px;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,255,255,.14),transparent 70%);
+  pointer-events:none;
+}
+.hero-mark-row{display:flex;align-items:baseline;gap:8px;margin-bottom:10px;position:relative}
+.hero-mark{font-size:30px;font-weight:700;line-height:1;color:#ffd66e;text-shadow:0 1px 2px rgba(0,0,0,.18)}
+.hero-mark-label{font-size:13px;letter-spacing:.18em;opacity:.85;font-weight:500}
+.hero-name-row{display:flex;align-items:center;gap:12px;margin-bottom:14px;position:relative}
+.hero-num{
+  width:56px;height:56px;border-radius:12px;
+  font-size:26px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+  box-shadow:0 3px 8px rgba(0,0,0,.22),inset 0 -2px 0 rgba(0,0,0,.08);
+}
+.hero-name{flex:1;min-width:0}
+.hero-horse-name{font-size:22px;font-weight:600;line-height:1.2;margin-bottom:4px;letter-spacing:.02em}
+.hero-horse-meta{font-size:12px;opacity:.88;line-height:1.5}
+.hero-stats{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:rgba(255,255,255,.18);border-radius:var(--radius);overflow:hidden;position:relative}
+.hero-stat{background:rgba(0,0,0,.20);padding:10px 14px}
+.hero-stat-label{font-size:10px;opacity:.75;letter-spacing:.06em;text-transform:uppercase}
+.hero-stat-val{font-size:22px;font-weight:600;margin-top:2px;line-height:1.1}
+.hero-pattern-badge{
+  display:inline-block;margin-top:8px;
+  padding:4px 12px;border-radius:14px;
+  font-size:11px;font-weight:600;letter-spacing:.04em;
+  background:rgba(255,255,255,.2);
+}
+
+/* サブ印（○▲）カード */
+.sub-cards{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.sub-card{
+  background:#fff;border:0.5px solid var(--border);border-radius:var(--radius);
+  padding:10px 12px;display:flex;align-items:center;gap:8px;
+}
+.sub-mark{font-size:22px;font-weight:700;line-height:1;flex-shrink:0}
+.sub-mark.m-tai{color:var(--green)}
+.sub-mark.m-san{color:var(--teal)}
+.sub-num{
+  width:34px;height:34px;border-radius:7px;
+  display:inline-flex;align-items:center;justify-content:center;
+  font-size:14px;font-weight:700;flex-shrink:0;
+}
+.sub-info{flex:1;min-width:0;overflow:hidden}
+.sub-info-name{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sub-info-meta{font-size:10px;color:var(--muted)}
+.sub-pct{font-size:14px;font-weight:600;color:var(--teal);flex-shrink:0}
+
+/* グレード行 */
+.grade-strip{
+  display:flex;gap:6px;margin-bottom:12px;
+  background:#fff;border:0.5px solid var(--border);
+  border-radius:var(--radius);padding:8px 10px;
+}
+.grade-strip-item{flex:1;text-align:center;font-size:11px;color:var(--muted)}
+.grade-strip-item .gv{font-size:14px;font-weight:600;display:block;margin-top:2px}
+
+/* ===== 買い目カード ===== */
+.buy-cards-wrap{padding:10px;background:#fafbfc}
+.buy-card{
+  background:#fff;border:0.5px solid var(--border);border-radius:var(--radius);
+  padding:11px 12px;margin-bottom:8px;
+  display:grid;grid-template-columns:auto 1fr auto;gap:8px 10px;
+  align-items:center;
+}
+.buy-kenshu{
+  font-size:11px;font-weight:600;
+  padding:4px 10px;border-radius:11px;letter-spacing:.04em;
+  white-space:nowrap;align-self:start;grid-row:1;
+}
+.buy-kenshu.tan{background:#fde9e9;color:#a32d2d}
+.buy-kenshu.fuku{background:#fff1d6;color:#854f0b}
+.buy-kenshu.uren{background:#e1f5f5;color:#0f6e6e}
+.buy-kenshu.utan{background:#fff0f6;color:#9e1d6b}
+.buy-kenshu.wide{background:#e6f1fb;color:var(--blue)}
+.buy-kenshu.s3p{background:#f3e6fb;color:#6b1d9e}
+.buy-kenshu.s3t{background:#e6f3eb;color:var(--green)}
+.buy-kumi-block{grid-column:2;grid-row:1;min-width:0}
+.buy-kumiawase{font-size:17px;font-weight:600;letter-spacing:.04em;line-height:1.2}
+.buy-meta{font-size:10px;color:var(--muted);margin-top:2px}
+.buy-kin{
+  font-size:18px;font-weight:700;color:var(--green);
+  white-space:nowrap;grid-column:3;grid-row:1;
+}
+.buy-konkyo{
+  grid-column:1/-1;grid-row:2;
+  font-size:11px;color:var(--muted);
+  padding-top:6px;border-top:0.5px dashed var(--border);
+  line-height:1.5;
+}
+.buy-total{
+  margin-top:4px;padding:11px 14px;
+  background:linear-gradient(135deg,#0a5d2e 0%,#1a8050 100%);
+  color:#fff;border-radius:var(--radius);
+  display:flex;justify-content:space-between;align-items:center;
+  font-size:13px;font-weight:500;letter-spacing:.04em;
+}
+.buy-total-val{font-size:20px;font-weight:700}
+
+/* 折り畳みカード */
+details.collapse-card{
+  background:#fff;border:0.5px solid var(--border);
+  border-radius:var(--radius-lg);overflow:hidden;margin-bottom:12px;
+}
+details.collapse-card > summary{
+  list-style:none;cursor:pointer;
+  background:var(--green);color:#fff;
+  padding:10px 14px;font-size:13px;font-weight:500;
+  display:flex;align-items:center;gap:8px;
+}
+details.collapse-card > summary::-webkit-details-marker{display:none}
+details.collapse-card > summary::after{
+  content:'▾';margin-left:auto;font-size:14px;transition:transform .2s;line-height:1
+}
+details.collapse-card[open] > summary::after{transform:rotate(180deg)}
+details.collapse-card.gray > summary{background:var(--bg2);color:var(--muted)}
+details.collapse-card.teal > summary{background:var(--teal)}
+details.collapse-card.amber > summary{background:var(--amber);color:#fff}
+
+/* スケルトン */
+.skel-wrap{padding:0 4px}
+.skel{
+  background:linear-gradient(90deg,#eef2f5 0%,#dde4eb 50%,#eef2f5 100%);
+  background-size:200% 100%;animation:skel 1.4s ease-in-out infinite;
+  border-radius:6px;
+}
+.skel-hero{height:160px;border-radius:var(--radius-lg);margin-bottom:10px}
+.skel-row{height:14px;margin:8px 0}
+.skel-row.w70{width:70%}
+.skel-row.w50{width:50%}
+@keyframes skel{
+  0%{background-position:200% 0}
+  100%{background-position:-200% 0}
+}
+
+/* 入力画面のステップアップ感 */
+.url-box-pretty{
+  background:linear-gradient(180deg,#fff 0%,#f6faf7 100%);
+  border:0.5px solid var(--border);border-left:3px solid var(--green);
+}
+.venue-tag{
+  display:inline-block;font-size:10px;color:#fff;
+  padding:1px 6px;border-radius:8px;margin-right:4px;letter-spacing:.04em;
+}
+.venue-tag.east{background:#1a4fa0}
+.venue-tag.west{background:#a32d2d}
+.venue-tag.local{background:#ba7517}
+
+@media (max-width:480px){
+  .hero-card{padding:14px}
+  .hero-mark{font-size:26px}
+  .hero-num{width:50px;height:50px;font-size:22px;border-radius:10px}
+  .hero-horse-name{font-size:19px}
+  .hero-stat-val{font-size:18px}
+  .sub-cards{grid-template-columns:1fr;gap:6px}
+  .buy-card{padding:10px}
+  .buy-kumiawase{font-size:16px}
+  .buy-kin{font-size:17px}
+  .buy-total-val{font-size:18px}
+}
 </style>
 </head>
 <body>
@@ -285,23 +456,23 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:var(--green2);
 <div class="panel active" id="panel-input">
 
   <!-- レース選択 -->
-  <div class="url-box">
-    <div class="url-head">レースを選択して自動取得</div>
+  <div class="url-box url-box-pretty">
+    <div class="url-head">🐎 レースを選択して自動取得</div>
     <div class="row2" style="margin-bottom:10px">
       <div>
         <label class="label" style="margin-top:0">競馬場</label>
         <select id="venue-code" onchange="fetchWeather()">
           <option value="">選択してください</option>
-          <option value="01">札幌</option>
-          <option value="02">函館</option>
-          <option value="03">福島</option>
-          <option value="04">新潟</option>
-          <option value="05">中山</option>
-          <option value="06">東京</option>
-          <option value="07">中京</option>
-          <option value="08">京都</option>
-          <option value="09">阪神</option>
-          <option value="10">小倉</option>
+          <option value="05">中山　（関東）</option>
+          <option value="06">東京　（関東）</option>
+          <option value="08">京都　（関西）</option>
+          <option value="09">阪神　（関西）</option>
+          <option value="01">札幌　（ローカル）</option>
+          <option value="02">函館　（ローカル）</option>
+          <option value="03">福島　（ローカル）</option>
+          <option value="04">新潟　（ローカル）</option>
+          <option value="07">中京　（ローカル）</option>
+          <option value="10">小倉　（ローカル）</option>
         </select>
       </div>
       <div>
@@ -368,10 +539,23 @@ netkeibaや競馬情報サイトからコピペしてください"></textarea>
 </div>
 
 <div class="panel" id="panel-loading">
-  <div class="loading">
+  <div class="loading" style="padding:36px 16px 20px">
     <div class="spinner"></div>
     <div class="loading-msg" id="loading-msg">データを取得中...</div>
     <div class="loading-sub" id="loading-sub">しばらくお待ちください</div>
+  </div>
+  <div class="skel-wrap" aria-hidden="true">
+    <div class="skel skel-hero"></div>
+    <div class="skel-card" style="background:#fff;border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:14px;margin-bottom:12px">
+      <div class="skel skel-row w70"></div>
+      <div class="skel skel-row w50"></div>
+      <div class="skel skel-row"></div>
+    </div>
+    <div class="skel-card" style="background:#fff;border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:14px">
+      <div class="skel skel-row w50"></div>
+      <div class="skel skel-row"></div>
+      <div class="skel skel-row w70"></div>
+    </div>
   </div>
 </div>
 
@@ -793,95 +977,170 @@ function wakuClass(num) { return `waku-${wakuFromUma(num)}`; }
 
 function renderResult(d) {
   const markCol = {'◎':'m-hon','○':'m-tai','▲':'m-san'};
+  const g = d.grade || {};
+  const venueLabel = currentPrediction.venue || '';
+  const raceLabel  = currentPrediction.race_num || '';
+  const hasRaceInfo = !!(venueLabel || raceLabel);
 
-  const honmeiHTML = (d.honmei||[]).map(h => `
-    <div class="honmei-row">
-      <span class="mark ${markCol[h.mark]||''}">${h.mark}</span>
-      <span class="uma-badge ${wakuClass(h.num)}">${h.num}</span>
-      <div style="flex:1">
-        <div class="hname">${h.name}</div>
-        <div class="hinfo">${h.sex||''}　斤量${h.weight||'—'}　${h.jockey||''}</div>
+  // 上部スティッキー
+  const stickyTopBar = hasRaceInfo
+    ? `<div class="race-sticky-bar">🐴 ${venueLabel} ${raceLabel}</div>` : '';
+
+  // パターンバッジ文言
+  const patternText = {
+    A:'パターンA・人気通り（少額）',
+    B:'パターンB・穴狙い（積極買い）',
+    C:'パターンC・混戦（様子見）'
+  }[d.race_pattern] || '';
+
+  // ヒーロー（◎本命）
+  const honmeiList = d.honmei || [];
+  const hon = honmeiList[0] || {};
+  const heroCard = hon.num ? `
+    <div class="hero-card">
+      <div class="hero-mark-row">
+        <span class="hero-mark">◎</span>
+        <span class="hero-mark-label">本命 / HONMEI</span>
       </div>
-      <span class="wpct">${h.pct}%</span>
-      <span class="pop">${h.pop}</span>
+      <div class="hero-name-row">
+        <div class="hero-num ${wakuClass(hon.num)}">${hon.num}</div>
+        <div class="hero-name">
+          <div class="hero-horse-name">${hon.name||'—'}</div>
+          <div class="hero-horse-meta">${[hon.sex,hon.jockey,hon.weight?'斤量'+hon.weight:''].filter(Boolean).join('　')}</div>
+        </div>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <div class="hero-stat-label">勝率 p1</div>
+          <div class="hero-stat-val">${hon.pct||d.honmeiPct||'—'}%</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-label">人気</div>
+          <div class="hero-stat-val">${hon.pop||'—'}</div>
+        </div>
+      </div>
+      ${patternText ? `<span class="hero-pattern-badge">${patternText}</span>` : ''}
+    </div>` : '';
+
+  // ○▲ サブカード
+  const subCards = honmeiList.slice(1).map(h => `
+    <div class="sub-card">
+      <span class="sub-mark ${markCol[h.mark]||''}">${h.mark}</span>
+      <span class="sub-num ${wakuClass(h.num)}">${h.num}</span>
+      <div class="sub-info">
+        <div class="sub-info-name">${h.name||''}</div>
+        <div class="sub-info-meta">${[h.sex,h.jockey].filter(Boolean).join('　')}　${h.pop||''}</div>
+      </div>
+      <span class="sub-pct">${h.pct||'—'}%</span>
     </div>`).join('');
 
+  const subWrap = subCards ? `<div class="sub-cards">${subCards}</div>` : '';
+
+  // グレード帯
+  const gradeStrip = `
+    <div class="grade-strip">
+      <div class="grade-strip-item">単勝<span class="gv ${gradeClass(g.tan)}">${g.tan||'-'}</span></div>
+      <div class="grade-strip-item">馬連<span class="gv ${gradeClass(g.baren)}">${g.baren||'-'}</span></div>
+      <div class="grade-strip-item">3連単<span class="gv ${gradeClass(g.sanren)}">${g.sanren||'-'}</span></div>
+    </div>`;
+
+  // レースヘッダー
+  const headerCard = `
+    <div class="result-header">
+      <div class="result-race">${d.raceName||''}　${d.venue||''}　${d.raceNum||''}</div>
+      <div class="result-meta">${d.raceType||''}　${d.weather||''}</div>
+    </div>`;
+
+  // 買い目カード
+  const kenshuClass = (k) => {
+    if (!k) return '';
+    if (k.includes('単勝')) return 'tan';
+    if (k.includes('複勝')) return 'fuku';
+    if (k.includes('馬連')) return 'uren';
+    if (k.includes('馬単')) return 'utan';
+    if (k.includes('ワイド')) return 'wide';
+    if (k.includes('3連複')) return 's3p';
+    if (k.includes('3連単')) return 's3t';
+    return '';
+  };
+
+  let kaikataInner = '';
+  if (d.miken) {
+    kaikataInner = `<div class="miken-msg">今回は購入見送り（自信不足）</div>`;
+  } else {
+    const cards = (d.kaikata||[]).map(r => `
+      <div class="buy-card">
+        <span class="buy-kenshu ${kenshuClass(r.kenshu)}">${r.kenshu}</span>
+        <div class="buy-kumi-block">
+          <div class="buy-kumiawase">${r.kumiawase||''}</div>
+          <div class="buy-meta">想定オッズ ${r.odds||'-'}倍 / ${r.kuchi||1}口</div>
+        </div>
+        <div class="buy-kin">${r.kin||0}円</div>
+        ${r.konkyo ? `<div class="buy-konkyo">${r.konkyo}</div>` : ''}
+      </div>`).join('');
+    const total = (d.kaikata||[]).reduce((s,r) => s+(Number(r.kin)||0), 0);
+    kaikataInner = `
+      <div class="buy-cards-wrap">
+        ${cards}
+        <div class="buy-total"><span>合計予算</span><span class="buy-total-val">${total}円</span></div>
+      </div>`;
+  }
+
+  const warnBanner = hasRaceInfo
+    ? `<div class="kaikata-warn">⚠️ ${venueLabel} ${raceLabel} の買い目です</div>`
+    : `<div class="kaikata-warn">⚠️ 買い目を確認してから投票してください</div>`;
+  const raceBanner = `<div class="race-banner-orange">🐴 ${venueLabel} ${raceLabel}</div>`;
+  const kaikataCard = `
+    <div class="card">
+      ${raceBanner}
+      <div class="card-head amber">私はこう買う　予算 ${d.budget||''}</div>
+      ${warnBanner}
+      ${kaikataInner}
+    </div>`;
+
+  // 敗因シナリオ
+  const haiin = (d.haiin||[]).map((h,i) => `
+    <div class="haiin-item"><span class="haiin-num">${i+1}.</span>${h}</div>`).join('');
+  const haiinCard = haiin ? `
+    <details class="collapse-card gray" open>
+      <summary>敗因シナリオ（◎が負ける6つの理由）</summary>
+      <div>${haiin}</div>
+    </details>` : '';
+
+  // 出走表（折り畳み）
   const shutsubaRows = (d.shutsuba||[]).map(r => `
     <tr>
-      <td><span class="uma-badge ${wakuClass(r.num)}" style="width:24px;height:24px;font-size:12px">${r.num}</span></td>
+      <td><span class="uma-badge ${wakuClass(r.num)}" style="width:26px;height:26px;font-size:12px">${r.num}</span></td>
       <td class="name-cell">${r.name||''}</td>
       <td>${r.sex||'-'}</td>
       <td>${r.weight||'-'}</td>
       <td>${r.jockey||'-'}</td>
       <td>${r.odds != null ? Number(r.odds).toFixed(1) : '-'}</td>
       <td>${r.pop || '-'}</td>
+      <td>${r.p1 != null ? Number(r.p1).toFixed(1)+'%' : '-'}</td>
       <td>${r.prevRank != null ? r.prevRank+'着' : '-'}</td>
-      <td>${r.horseWeight || '-'}</td>
     </tr>`).join('');
-
-  const haiin = (d.haiin||[]).map((h,i) => `
-    <div class="haiin-item"><span class="haiin-num">${i+1}.</span>${h}</div>`).join('');
-
-  const g = d.grade || {};
-  const venueLabel = currentPrediction.venue || '';
-  const raceLabel  = currentPrediction.race_num || '';
-  const hasRaceInfo = !!(venueLabel || raceLabel);
-  const stickyTopBar = hasRaceInfo
-    ? `<div class="race-sticky-bar">🐴 ${venueLabel} ${raceLabel}</div>` : '';
-  const raceBanner = `<div class="race-banner-orange">🐴 ${venueLabel} ${raceLabel}</div>`;
-  const warnBanner = hasRaceInfo
-    ? `<div class="kaikata-warn">⚠️ ${venueLabel} ${raceLabel} の買い目です</div>`
-    : `<div class="kaikata-warn">⚠️ 買い目を確認してから投票してください</div>`;
-
-  let kaikata = '';
-  if (d.miken) {
-    kaikata = `${raceBanner}<div class="card-head amber">私はこう買う　p1 ${d.honmeiPct}%</div>${warnBanner}
-      <div class="miken-msg">今回は購入見送り</div>`;
-  } else {
-    const rows = (d.kaikata||[]).map(r => `<tr>
-      <td>${r.kenshu}</td><td>${r.kumiawase}</td><td>${r.odds}</td>
-      <td style="text-align:center">${r.kuchi}</td>
-      <td style="text-align:right">${r.kin}円</td>
-      <td style="font-size:11px;color:#999">${r.konkyo}</td>
-    </tr>`).join('');
-    const total = (d.kaikata||[]).reduce((s,r) => s+(Number(r.kin)||0), 0);
-    kaikata = `${raceBanner}<div class="card-head amber">私はこう買う　予算 ${d.budget||''}</div>${warnBanner}
-    <div class="kaikata-wrap"><table class="ktable">
-      <thead><tr><th>券種</th><th>組合せ</th><th>想定オッズ</th><th>口数</th><th>金額</th><th>根拠</th></tr></thead>
-      <tbody>${rows}
-        <tr class="total-row"><td colspan="4" style="text-align:right">合計</td><td style="text-align:right">${total}円</td><td></td></tr>
-      </tbody>
-    </table></div>`;
-  }
-
-  document.getElementById('result-content').innerHTML = `
-    ${stickyTopBar}
-    <div class="result-header">
-      <div class="result-race">${d.raceName||''}　${d.venue||''}　${d.raceNum||''}</div>
-      <div class="result-meta">${d.raceType||''}　${d.weather||''}</div>
-    </div>
-    <div class="grade-row">
-      <div class="grade-pill">単勝：<span class="${gradeClass(g.tan)}">${g.tan||'-'}</span></div>
-      <div class="grade-pill">馬連：<span class="${gradeClass(g.baren)}">${g.baren||'-'}</span></div>
-      <div class="grade-pill">3連単：<span class="${gradeClass(g.sanren)}">${g.sanren||'-'}</span></div>
-    </div>
-    <div class="pct-banner">◎勝率(p1)：<span class="pct-val">${d.honmeiPct||'—'}%</span>
-      ${d.race_pattern ? `<span style="margin-left:12px;font-size:12px;padding:3px 10px;border-radius:10px;font-weight:500;background:${d.race_pattern==='B'?'#0a5d2e':d.race_pattern==='C'?'#854f0b':'#1d9e75'};color:white">
-        ${d.race_pattern==='A'?'パターンA：人気通り（少額)':d.race_pattern==='B'?'パターンB：穴狙い（積極買い）':'パターンC：混戦（様子見）'}
-      </span>` : ''}
-    </div>
-    <div class="card"><div class="card-head">最終予想</div>${honmeiHTML}</div>
-    <div class="card">
-      <div class="card-head teal">出走表</div>
+  const shutsubaCard = `
+    <details class="collapse-card teal">
+      <summary>出走表（${(d.shutsuba||[]).length}頭）— タップで展開</summary>
       <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
         <table class="shutsuba-table">
-          <thead><tr><th>馬番</th><th style="text-align:left">馬名</th><th>性齢</th><th>斤量</th><th>騎手</th><th>オッズ</th><th>人気</th><th>前走</th><th>馬体重</th></tr></thead>
+          <thead><tr><th>馬番</th><th style="text-align:left">馬名</th><th>性齢</th><th>斤量</th><th>騎手</th><th>オッズ</th><th>人気</th><th>p1</th><th>前走</th></tr></thead>
           <tbody>${shutsubaRows}</tbody>
         </table>
       </div>
-    </div>
-    <div class="card"><div class="card-head gray">敗因シナリオ</div>${haiin}</div>
-    <div class="card">${kaikata}</div>`;
+    </details>`;
+
+  document.getElementById('result-content').innerHTML = `
+    ${stickyTopBar}
+    ${headerCard}
+    ${heroCard}
+    ${subWrap}
+    ${gradeStrip}
+    ${haiinCard}
+    ${kaikataCard}
+    ${shutsubaCard}
+  `;
 }
 </script>
 </body>
