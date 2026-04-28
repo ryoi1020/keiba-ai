@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: keiba-ai
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python3 server.py
+    envVars:
+      - key: PORT
+        value: 11000
+      - key: ANTHROPIC_API_KEY
+        sync: false

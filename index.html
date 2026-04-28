@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CC 競馬予想 AI</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Hiragino Kaku Gothic ProN','Hiragino Sans','Meiryo',sans-serif;background:#f0f5f1;color:#1a1a1a;max-width:740px;margin:0 auto;padding-bottom:40px}
+:root{
+  --green:#0a5d2e;--green2:#1a8050;--green-light:#e6f3eb;
+  --teal:#0f6e6e;--teal2:#1d9e9e;--teal-light:#e1f5f5;
+  --amber:#854f0b;--amber-light:#faeeda;
+  --blue:#185fa5;--blue-light:#e6f1fb;
+  --red:#a32d2d;--red-light:#fcebeb;
+  --bg:#fff;--bg2:#f0f5f1;--border:rgba(0,0,0,0.12);--muted:#666;
+  --radius:8px;--radius-lg:12px;
+}
+.header{background:var(--green);color:#fff;padding:16px 20px}
+.header-title{font-size:19px;font-weight:500;letter-spacing:.04em}
+.header-sub{font-size:11px;opacity:.7;margin-top:3px}
+.wave{display:flex;gap:3px;margin-top:10px}
+.wave span{display:inline-block;width:20px;height:4px;background:rgba(255,255,255,.3);border-radius:2px}
+.wave span:nth-child(2){background:rgba(255,255,255,.6);height:7px}
+.wave span:nth-child(3){background:rgba(255,255,255,.45);height:5px}
+.wave span:nth-child(4){background:rgba(255,255,255,.35);height:6px}
+
+/* ステップバー */
+.step-bar{display:flex;background:#fff;border-bottom:0.5px solid var(--border);position:sticky;top:0;z-index:10}
+.step{flex:1;padding:10px 6px;font-size:12px;text-align:center;color:var(--muted);border-bottom:2px solid transparent}
+.step.active{color:var(--green);border-bottom-color:var(--green);font-weight:500}
+.step.done{color:var(--teal2)}
+
+.panel{display:none;padding:16px 20px}
+.panel.active{display:block}
+
+/* フォーム */
+.label{font-size:12px;color:var(--muted);margin-bottom:5px;font-weight:500;margin-top:14px;display:block}
+textarea,input[type=text],input[type=password],input[type=date],select{
+  width:100%;font-size:13px;padding:9px 11px;
+  border:0.5px solid rgba(0,0,0,0.2);border-radius:var(--radius);
+  background:#fff;color:#1a1a1a;font-family:inherit;line-height:1.5
+}
+textarea{min-height:190px;resize:vertical}
+textarea:focus,input:focus,select:focus{outline:none;border-color:var(--green2);box-shadow:0 0 0 2px rgba(26,128,80,.12)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btn-primary{
+  background:var(--green);color:#fff;border:none;
+  padding:11px 20px;border-radius:var(--radius);
+  font-size:14px;cursor:pointer;font-weight:500;width:100%;margin-top:14px
+}
+.btn-primary:hover{background:var(--green2)}
+.btn-primary:disabled{background:#9ac4ad;cursor:not-allowed}
+.btn-back{
+  background:none;border:0.5px solid rgba(0,0,0,0.2);color:var(--muted);
+  padding:8px 16px;border-radius:var(--radius);font-size:13px;cursor:pointer;margin-top:12px
+}
+.btn-back:hover{background:var(--bg2)}
+.btn-sm{
+  font-size:12px;padding:5px 12px;border-radius:var(--radius);cursor:pointer;
+  border:0.5px solid rgba(0,0,0,0.2);background:none;color:var(--green)
+}
+.btn-sm:hover{background:var(--green-light)}
+
+/* URL入力エリア */
+.url-box{background:#fff;border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:14px;margin-bottom:14px}
+.url-head{font-size:13px;font-weight:500;margin-bottom:10px}
+
+.or-divider{text-align:center;color:var(--muted);font-size:12px;margin:12px 0;position:relative}
+.or-divider::before,.or-divider::after{content:'';position:absolute;top:50%;width:42%;height:0.5px;background:var(--border)}
+.or-divider::before{left:0}
+.or-divider::after{right:0}
+
+/* ローディング */
+.loading{text-align:center;padding:56px 20px}
+.spinner{width:38px;height:38px;border:3px solid rgba(0,0,0,0.08);border-top-color:var(--green);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-msg{font-size:14px;color:var(--muted);margin-top:4px}
+.loading-sub{font-size:11px;color:#aaa;margin-top:6px}
+
+/* 結果 */
+.result-header{background:var(--green);color:#fff;border-radius:var(--radius);padding:14px 16px;margin-bottom:12px}
+.result-race{font-size:16px;font-weight:500}
+.result-meta{font-size:11px;opacity:.8;margin-top:4px}
+.pct-banner{background:var(--teal-light);border-left:3px solid var(--teal2);padding:10px 12px;border-radius:0 var(--radius) var(--radius) 0;margin-bottom:12px;font-size:13px;color:#085050}
+.pct-val{font-size:22px;font-weight:500;color:var(--teal)}
+.grade-row{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.grade-pill{background:#fff;border:0.5px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px}
+.grade-s{color:#a32d2d;font-weight:500}.grade-a{color:#ba7517;font-weight:500}.grade-b{color:var(--muted)}
+.card{background:#fff;border:0.5px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:12px}
+.card-head{background:var(--green);color:#fff;padding:8px 12px;font-size:13px;font-weight:500}
+.card-head.amber{background:var(--amber);color:var(--amber-light)}
+.card-head.gray{background:var(--bg2);color:var(--muted)}
+.card-head.teal{background:var(--teal);color:#fff}
+
+/* 馬番バッジ（枠番カラー） */
+.uma-badge{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;font-size:13px;font-weight:600;flex-shrink:0}
+.waku-1{background:#fff;color:#1a1a1a;border:1.5px solid #ccc}
+.waku-2{background:#111;color:#fff}
+.waku-3{background:#cc0000;color:#fff}
+.waku-4{background:#1d59c4;color:#fff}
+.waku-5{background:#f5c400;color:#333}
+.waku-6{background:#1d9e5a;color:#fff}
+.waku-7{background:#e87a1d;color:#fff}
+.waku-8{background:#e84d8a;color:#fff}
+
+.honmei-row{display:flex;align-items:center;padding:10px 12px;border-bottom:0.5px solid var(--border);gap:8px}
+.honmei-row:last-child{border-bottom:none}
+.mark{font-size:18px;font-weight:500;min-width:26px}
+.m-hon{color:#a32d2d}.m-tai{color:var(--green)}.m-san{color:var(--teal)}
+.hname{font-size:14px;font-weight:500;flex:1}
+.hinfo{font-size:11px;color:var(--muted)}
+.wpct{font-size:13px;font-weight:500;color:var(--teal);min-width:46px;text-align:right}
+.pop{font-size:11px;background:var(--blue-light);color:var(--blue);padding:2px 6px;border-radius:10px;white-space:nowrap}
+
+.shutsuba-table{width:100%;border-collapse:collapse;font-size:12px}
+.shutsuba-table th{background:var(--bg2);padding:6px 8px;text-align:center;border-bottom:0.5px solid var(--border);color:var(--muted);font-size:11px;font-weight:500}
+.shutsuba-table td{padding:7px 8px;border-bottom:0.5px solid var(--border);text-align:center;vertical-align:middle}
+.shutsuba-table tr:last-child td{border-bottom:none}
+.name-cell{text-align:left!important;font-weight:500}
+
+.haiin-item{padding:8px 12px;border-bottom:0.5px solid var(--border);font-size:12px;color:var(--muted);line-height:1.6}
+.haiin-item:last-child{border-bottom:none}
+.haiin-num{color:var(--green2);font-weight:500;margin-right:4px}
+
+.ktable{width:100%;border-collapse:collapse;font-size:12px}
+.ktable th{padding:6px 8px;text-align:left;border-bottom:0.5px solid var(--border);color:var(--muted);font-size:11px;background:var(--bg2)}
+.ktable td{padding:7px 8px;border-bottom:0.5px solid var(--border)}
+.ktable .total-row td{font-weight:500;background:var(--bg2);border-bottom:none}
+.kaikata-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.miken-msg{padding:14px;font-size:13px;color:var(--muted);text-align:center}
+
+.err-box{background:var(--red-light);border:0.5px solid #f09595;border-radius:var(--radius);padding:12px;color:#791f1f;font-size:13px;margin-top:12px;line-height:1.7}
+.sample-link{font-size:12px;color:var(--blue);background:none;border:none;cursor:pointer;text-decoration:underline;padding:0;margin-top:6px;display:inline-block}
+
+/* 結果画面トップ：常時表示の会場バー */
+.race-sticky-bar{
+  position:sticky;top:34px;z-index:9;
+  background:linear-gradient(135deg,#0a5d2e 0%,#1a8050 100%);
+  color:#fff;padding:12px 14px;text-align:center;
+  font-size:22px;font-weight:600;letter-spacing:.06em;
+  border-radius:var(--radius);
+  box-shadow:0 3px 8px rgba(0,0,0,.18);
+  margin-bottom:12px;
+}
+
+/* 「私はこう買う」上のオレンジ会場バナー */
+.race-banner-orange{
+  background:linear-gradient(135deg,#854f0b 0%,#a86515 100%);
+  color:#fff;padding:18px 16px;text-align:center;
+  font-size:26px;font-weight:600;letter-spacing:.06em;
+  box-shadow:inset 0 -2px 0 rgba(0,0,0,.08);
+}
+
+/* 「私はこう買う」セクション冒頭の赤い警告バナー */
+.kaikata-warn{
+  background:linear-gradient(135deg,#a32d2d 0%,#c93838 100%);
+  color:#fff;padding:12px 14px;text-align:center;
+  font-size:15px;font-weight:600;letter-spacing:.04em;
+  border-bottom:2px solid #7a1f1f;
+}
+
+/* スマホ向け最適化（〜480px）*/
+@media (max-width:480px){
+  body{padding-bottom:30px}
+  .panel{padding:12px}
+  .header{padding:12px 14px}
+  .header-title{font-size:17px}
+  .step{font-size:11px;padding:9px 4px}
+
+  .result-header{padding:12px}
+  .result-race{font-size:14px}
+  .result-meta{font-size:10px}
+
+  .mark{font-size:26px;min-width:30px}
+  .hname{font-size:15px}
+  .wpct{font-size:14px;min-width:50px}
+  .uma-badge{width:30px;height:30px;font-size:14px}
+
+  .race-sticky-bar{font-size:19px;padding:10px 12px}
+  .race-banner-orange{font-size:22px;padding:14px 12px}
+  .kaikata-warn{font-size:13px;padding:10px 12px}
+
+  .ktable{font-size:11px;min-width:560px}
+  .ktable th,.ktable td{padding:6px 6px;white-space:nowrap}
+  .shutsuba-table{font-size:11px;min-width:600px}
+  .shutsuba-table th,.shutsuba-table td{padding:6px 4px;white-space:nowrap}
+}
+
+@media (max-width:375px){
+  .panel{padding:10px 8px}
+  .mark{font-size:24px;min-width:28px}
+  .result-race{font-size:13px}
+  .race-sticky-bar{font-size:18px;padding:9px 10px;letter-spacing:.04em}
+  .race-banner-orange{font-size:20px;padding:12px 10px}
+  .honmei-row{padding:8px 10px;gap:6px}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-title">CC 競馬予想 AI</div>
+  <div class="header-sub">netkeibaから自動取得・◎○▲・買い目まで生成</div>
+  <button onclick="showDashboard()" style="margin-top:8px;background:rgba(255,255,255,0.2);border:none;color:white;padding:5px 12px;border-radius:var(--radius);font-size:12px;cursor:pointer">成績を見る</button>
+  <div class="wave">
+    <span></span><span></span><span></span><span></span><span></span><span></span>
+  </div>
+</div>
+
+<div class="step-bar">
+  <div class="step active" id="s1">1. レースを指定</div>
+  <div class="step" id="s2">2. データ取得中</div>
+  <div class="step" id="s3">3. AI予想中</div>
+  <div class="step" id="s4">4. 予想結果</div>
+</div>
+
+<div class="panel" id="panel-dashboard">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+    <div style="font-size:15px;font-weight:500">成績ダッシュボード</div>
+    <button class="btn-sm" onclick="showInput()">← 予想に戻る</button>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px">
+    <div style="background:var(--bg2);border-radius:var(--radius);padding:10px;text-align:center">
+      <div style="font-size:11px;color:var(--muted)">予想レース数</div>
+      <div style="font-size:20px;font-weight:500;margin-top:4px" id="stat-races">-</div>
+    </div>
+    <div style="background:var(--bg2);border-radius:var(--radius);padding:10px;text-align:center">
+      <div style="font-size:11px;color:var(--muted)">的中率</div>
+      <div style="font-size:20px;font-weight:500;margin-top:4px" id="stat-hitrate">-</div>
+    </div>
+    <div style="background:var(--bg2);border-radius:var(--radius);padding:10px;text-align:center">
+      <div style="font-size:11px;color:var(--muted)">回収率</div>
+      <div style="font-size:20px;font-weight:500;margin-top:4px" id="stat-roi">-</div>
+    </div>
+    <div style="background:var(--bg2);border-radius:var(--radius);padding:10px;text-align:center">
+      <div style="font-size:11px;color:var(--muted)">収支</div>
+      <div style="font-size:20px;font-weight:500;margin-top:4px" id="stat-profit">-</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:12px">
+    <div class="card-head teal">月別成績</div>
+    <div style="padding:12px;overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;font-size:12px" id="monthly-table">
+        <thead>
+          <tr style="background:var(--bg2)">
+            <th style="padding:6px 8px;text-align:left;border-bottom:0.5px solid var(--border)">月</th>
+            <th style="padding:6px 8px;text-align:center;border-bottom:0.5px solid var(--border)">レース数</th>
+            <th style="padding:6px 8px;text-align:center;border-bottom:0.5px solid var(--border)">的中率</th>
+            <th style="padding:6px 8px;text-align:center;border-bottom:0.5px solid var(--border)">回収率</th>
+            <th style="padding:6px 8px;text-align:right;border-bottom:0.5px solid var(--border)">収支</th>
+          </tr>
+        </thead>
+        <tbody id="monthly-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:12px">
+    <div class="card-head gray">券種別成績</div>
+    <div style="padding:12px;overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;font-size:12px">
+        <thead>
+          <tr style="background:var(--bg2)">
+            <th style="padding:6px 8px;text-align:left;border-bottom:0.5px solid var(--border)">券種</th>
+            <th style="padding:6px 8px;text-align:center;border-bottom:0.5px solid var(--border)">購入数</th>
+            <th style="padding:6px 8px;text-align:center;border-bottom:0.5px solid var(--border)">的中</th>
+            <th style="padding:6px 8px;text-align:center;border-bottom:0.5px solid var(--border)">的中率</th>
+            <th style="padding:6px 8px;text-align:right;border-bottom:0.5px solid var(--border)">収支</th>
+          </tr>
+        </thead>
+        <tbody id="kenshu-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head gray">直近の予想</div>
+    <div id="recent-list"></div>
+  </div>
+</div>
+
+<div class="panel active" id="panel-input">
+
+  <!-- レース選択 -->
+  <div class="url-box">
+    <div class="url-head">レースを選択して自動取得</div>
+    <div class="row2" style="margin-bottom:10px">
+      <div>
+        <label class="label" style="margin-top:0">競馬場</label>
+        <select id="venue-code" onchange="fetchWeather()">
+          <option value="">選択してください</option>
+          <option value="01">札幌</option>
+          <option value="02">函館</option>
+          <option value="03">福島</option>
+          <option value="04">新潟</option>
+          <option value="05">中山</option>
+          <option value="06">東京</option>
+          <option value="07">中京</option>
+          <option value="08">京都</option>
+          <option value="09">阪神</option>
+          <option value="10">小倉</option>
+        </select>
+      </div>
+      <div>
+        <label class="label" style="margin-top:0">レース番号</label>
+        <select id="race-no">
+          <option value="">選択してください</option>
+          <option value="1">1R</option><option value="2">2R</option><option value="3">3R</option>
+          <option value="4">4R</option><option value="5">5R</option><option value="6">6R</option>
+          <option value="7">7R</option><option value="8">8R</option><option value="9">9R</option>
+          <option value="10">10R</option><option value="11">11R</option><option value="12">12R</option>
+        </select>
+      </div>
+    </div>
+    <div style="margin-bottom:10px">
+      <label class="label" style="margin-top:0">日付</label>
+      <input type="date" id="race-date">
+    </div>
+    <div style="margin-bottom:10px">
+      <label class="label" style="margin-top:0">race_id（任意：netkeibaのURLから直接指定）</label>
+      <input type="text" id="race-id" placeholder="例: 202504280811（空欄で自動構築）">
+    </div>
+    <button class="btn-sm" style="width:100%;padding:9px" onclick="scrapeUrl()">出走表を自動取得</button>
+    <div style="font-size:11px;color:var(--muted);margin-top:8px">
+      <a href="https://race.netkeiba.com/top/" target="_blank" style="color:var(--blue)">netkeiba</a> で当日のレースを確認できます
+    </div>
+  </div>
+
+  <div class="or-divider">または 出走表を直接貼る</div>
+
+  <label class="label">出走表テキスト</label>
+  <textarea id="shutsuba-input" placeholder="例：
+1番 ホースA 牡4 斤量57.0 騎手ルメール 厩舎国枝 馬体重480 オッズ3.2 人気1番人気 前走1着
+2番 ホースB 牝4 斤量55.0 騎手川田 厩舎友道 馬体重462 オッズ8.5 人気3番人気 前走3着
+...
+
+netkeibaや競馬情報サイトからコピペしてください"></textarea>
+  <button class="sample-link" onclick="loadSample()">サンプルデータを読み込む（動作確認用）</button>
+
+  <div class="row2" style="margin-top:4px">
+    <div>
+      <label class="label">レース情報（任意）</label>
+      <input type="text" id="race-meta" placeholder="例：東京11R 天皇賞・春">
+    </div>
+    <div>
+      <label class="label" style="display:flex;align-items:center;gap:6px">
+        馬場・天候
+        <span id="weather-badge" style="font-size:11px;background:#e1f5ee;color:#0f6e56;padding:2px 8px;border-radius:10px;display:none">自動取得済み</span>
+        <span id="weather-loading" style="font-size:11px;color:#666;display:none">取得中...</span>
+      </label>
+      <input type="text" id="weather-cond" placeholder="例：晴れ 良 気温18度">
+    </div>
+  </div>
+
+  <label class="label">会場</label>
+  <select id="venue-select">
+    <option value="">選択（任意）</option>
+    <option>札幌</option><option>函館</option><option>福島</option><option>新潟</option>
+    <option>中山</option><option>東京</option><option>中京</option><option>京都</option>
+    <option>阪神</option><option>小倉</option>
+  </select>
+
+  <button class="btn-primary" onclick="generatePrediction()">AI予想を生成する</button>
+  <div id="err-msg"></div>
+</div>
+
+<div class="panel" id="panel-loading">
+  <div class="loading">
+    <div class="spinner"></div>
+    <div class="loading-msg" id="loading-msg">データを取得中...</div>
+    <div class="loading-sub" id="loading-sub">しばらくお待ちください</div>
+  </div>
+</div>
+
+<div class="panel" id="panel-result">
+  <div id="result-content"></div>
+  <div class="card" id="result-input-box" style="margin-top:12px">
+    <div class="card-head gray">結果を登録する</div>
+    <div style="padding:12px">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:10px">レース終了後に1〜3着の馬番を入力してください</div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <div style="text-align:center">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:4px">1着</div>
+          <input type="number" id="result-first" min="1" max="18" style="width:64px;text-align:center;font-size:14px">
+        </div>
+        <div style="text-align:center">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:4px">2着</div>
+          <input type="number" id="result-second" min="1" max="18" style="width:64px;text-align:center;font-size:14px">
+        </div>
+        <div style="text-align:center">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:4px">3着</div>
+          <input type="number" id="result-third" min="1" max="18" style="width:64px;text-align:center;font-size:14px">
+        </div>
+        <button class="btn-primary" style="flex:1;margin-top:0;min-width:120px" onclick="submitResult()">結果を登録</button>
+      </div>
+      <div id="result-status" style="font-size:12px;margin-top:8px"></div>
+    </div>
+  </div>
+  <button class="btn-back" onclick="goBack()">← 別のレースを予想する</button>
+</div>
+
+<script>
+const SERVER = window.location.origin;
+
+const SAMPLE_TEXT = `1番 サクラスター 牡4 斤量57.0 騎手ルメール 厩舎国枝 馬体重480 オッズ3.2 人気1番人気 前走1着
+2番 メイショウサンライズ 牝4 斤量55.0 騎手川田 厩舎友道 馬体重462 オッズ8.5 人気3番人気 前走3着
+3番 ハービンジャーロード 牡5 斤量57.0 騎手戸崎 厩舎藤原 馬体重494 オッズ12.3 人気5番人気 前走4着
+4番 タイキシャトル 牡6 斤量57.0 騎手武豊 厩舎角居 馬体重488 オッズ22.0 人気7番人気 前走7着
+5番 ステイゴールド 牡4 斤量57.0 騎手横山典 厩舎栗田 馬体重476 オッズ5.4 人気2番人気 前走2着
+6番 ディープインパクト 牡4 斤量57.0 騎手浜中 厩舎池江 馬体重484 オッズ9.8 人気4番人気 前走5着
+7番 オルフェーヴル 牡5 斤量57.0 騎手M.デムーロ 厩舎池江 馬体重492 オッズ18.5 人気6番人気 前走6着
+8番 キタサンブラック 牡4 斤量57.0 騎手北村 厩舎清水 馬体重504 オッズ45.0 人気8番人気 前走8着`;
+
+function loadSample() {
+  document.getElementById('shutsuba-input').value = SAMPLE_TEXT;
+  document.getElementById('race-meta').value = '東京11R 天皇賞・春';
+  document.getElementById('weather-cond').value = '晴れ 良 気温18度';
+  document.getElementById('venue-select').value = '東京';
+}
+
+// 競馬場の座標
+const VENUE_COORDS = {
+  '01': { name:'札幌', lat:43.0667, lon:141.4333 },
+  '02': { name:'函館', lat:41.7833, lon:140.7333 },
+  '03': { name:'福島', lat:37.7667, lon:140.4833 },
+  '04': { name:'新潟', lat:37.9167, lon:139.0500 },
+  '05': { name:'中山', lat:35.7167, lon:139.9667 },
+  '06': { name:'東京', lat:35.6500, lon:139.4833 },
+  '07': { name:'中京', lat:35.0667, lon:137.0167 },
+  '08': { name:'京都', lat:34.9000, lon:135.7333 },
+  '09': { name:'阪神', lat:34.7833, lon:135.3500 },
+  '10': { name:'小倉', lat:33.8500, lon:130.8833 },
+};
+
+const WEATHER_CODE = {
+  0:'快晴', 1:'晴れ', 2:'一部曇り', 3:'曇り',
+  45:'霧', 48:'霧',
+  51:'小雨', 53:'雨', 55:'強雨',
+  61:'小雨', 63:'雨', 65:'強雨',
+  71:'小雪', 73:'雪', 75:'大雪',
+  80:'にわか雨', 81:'雨', 82:'強雨',
+  95:'雷雨', 96:'雷雨', 99:'激しい雷雨'
+};
+
+async function fetchWeather() {
+  const jcd = document.getElementById('venue-code').value;
+  if (!jcd) return;
+  const venue = VENUE_COORDS[jcd];
+  if (!venue) return;
+
+  const badge = document.getElementById('weather-badge');
+  const loading = document.getElementById('weather-loading');
+  badge.style.display = 'none';
+  loading.style.display = 'inline';
+
+  try {
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${venue.lat}&longitude=${venue.lon}&current=temperature_2m,weather_code,precipitation,wind_speed_10m&wind_speed_unit=ms&timezone=Asia%2FTokyo`;
+    const res = await fetch(url);
+    const data = await res.json();
+    const cur = data.current;
+
+    const weatherDesc = WEATHER_CODE[cur.weather_code] || '不明';
+    const temp = cur.temperature_2m != null ? Math.round(cur.temperature_2m) : null;
+    const windSpd = cur.wind_speed_10m != null ? Math.round(cur.wind_speed_10m * 10) / 10 : null;
+    const precip = cur.precipitation;
+
+    // 馬場推定
+    let baba = '良';
+    if (precip != null) {
+      if (precip >= 5) baba = '不良';
+      else if (precip >= 1) baba = '稍重〜重';
+      else if (precip > 0) baba = '稍重';
+    }
+
+    let parts = [weatherDesc, baba];
+    if (temp != null) parts.push(`気温${temp}度`);
+    if (windSpd != null && windSpd >= 3) parts.push(`風${windSpd}m`);
+
+    document.getElementById('weather-cond').value = parts.join(' ');
+    loading.style.display = 'none';
+    badge.style.display = 'inline';
+  } catch(e) {
+    loading.style.display = 'none';
+    console.warn('天気取得失敗:', e);
+  }
+}
+
+window.addEventListener('load', () => {
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth()+1).padStart(2,'0');
+  const dd = String(today.getDate()).padStart(2,'0');
+  document.getElementById('race-date').value = `${yyyy}-${mm}-${dd}`;
+  checkServer();
+});
+
+async function checkServer() {
+  try {
+    await fetch(`${SERVER}/health`);
+  } catch {}
+}
+
+function setStep(n) {
+  const steps = ['s1','s2','s3','s4'];
+  steps.forEach((id,i) => {
+    document.getElementById(id).className = 'step' + (i+1===n?' active':i+1<n?' done':'');
+  });
+  if (n === 1) {
+    document.getElementById('panel-input').className = 'panel active';
+    document.getElementById('panel-loading').className = 'panel';
+    document.getElementById('panel-result').className = 'panel';
+  } else if (n === 2 || n === 3) {
+    document.getElementById('panel-input').className = 'panel';
+    document.getElementById('panel-loading').className = 'panel active';
+    document.getElementById('panel-result').className = 'panel';
+  } else if (n === 4) {
+    document.getElementById('panel-input').className = 'panel';
+    document.getElementById('panel-loading').className = 'panel';
+    document.getElementById('panel-result').className = 'panel active';
+  }
+}
+
+function goBack() { setStep(1); }
+
+function showInput() {
+  document.querySelectorAll('.panel').forEach(p => p.className = 'panel');
+  document.getElementById('panel-input').className = 'panel active';
+}
+
+function showDashboard() {
+  document.querySelectorAll('.panel').forEach(p => p.className = 'panel');
+  document.getElementById('panel-dashboard').className = 'panel active';
+  loadStats();
+}
+
+async function loadStats() {
+  try {
+    const res = await fetch(`${SERVER}/stats`);
+    const data = await res.json();
+
+    const t = data.total;
+    const hitrate = t.bets > 0 ? (t.hits / t.bets * 100).toFixed(1) : '-';
+    const roi = t.bet > 0 ? (t.payout / t.bet * 100).toFixed(1) : '-';
+    const profit = t.payout - t.bet;
+    document.getElementById('stat-races').textContent = t.races;
+    document.getElementById('stat-hitrate').textContent = hitrate !== '-' ? hitrate + '%' : '-';
+    document.getElementById('stat-roi').textContent = roi !== '-' ? roi + '%' : '-';
+    const profitEl = document.getElementById('stat-profit');
+    profitEl.textContent = profit >= 0 ? `+${profit}円` : `${profit}円`;
+    profitEl.style.color = profit >= 0 ? '#0f6e56' : '#a32d2d';
+
+    const tbody = document.getElementById('monthly-tbody');
+    tbody.innerHTML = data.monthly.map(m => {
+      const hr = m.bets > 0 ? (m.hits / m.bets * 100).toFixed(1) : '-';
+      const rr = m.bet > 0 ? (m.payout / m.bet * 100).toFixed(1) : '-';
+      const pf = m.payout - m.bet;
+      return `<tr>
+        <td style="padding:6px 8px;border-bottom:0.5px solid var(--border)">${m.month}</td>
+        <td style="padding:6px 8px;text-align:center;border-bottom:0.5px solid var(--border)">${m.races}</td>
+        <td style="padding:6px 8px;text-align:center;border-bottom:0.5px solid var(--border)">${hr !== '-' ? hr + '%' : '-'}</td>
+        <td style="padding:6px 8px;text-align:center;border-bottom:0.5px solid var(--border)">${rr !== '-' ? rr + '%' : '-'}</td>
+        <td style="padding:6px 8px;text-align:right;border-bottom:0.5px solid var(--border);color:${pf >= 0 ? '#0f6e56' : '#a32d2d'}">${pf >= 0 ? '+' : ''}${pf}円</td>
+      </tr>`;
+    }).join('') || '<tr><td colspan="5" style="padding:16px;text-align:center;color:var(--muted)">まだデータがありません</td></tr>';
+
+    const kbody = document.getElementById('kenshu-tbody');
+    kbody.innerHTML = data.by_kenshu.map(k => {
+      const hr = k.bets > 0 ? (k.hits / k.bets * 100).toFixed(1) : '-';
+      const pf = k.payout - k.bet;
+      return `<tr>
+        <td style="padding:6px 8px;border-bottom:0.5px solid var(--border)">${k.kenshu}</td>
+        <td style="padding:6px 8px;text-align:center;border-bottom:0.5px solid var(--border)">${k.bets}</td>
+        <td style="padding:6px 8px;text-align:center;border-bottom:0.5px solid var(--border)">${k.hits}</td>
+        <td style="padding:6px 8px;text-align:center;border-bottom:0.5px solid var(--border)">${hr !== '-' ? hr + '%' : '-'}</td>
+        <td style="padding:6px 8px;text-align:right;border-bottom:0.5px solid var(--border);color:${pf >= 0 ? '#0f6e56' : '#a32d2d'}">${pf >= 0 ? '+' : ''}${pf}円</td>
+      </tr>`;
+    }).join('') || '<tr><td colspan="5" style="padding:16px;text-align:center;color:var(--muted)">まだデータがありません</td></tr>';
+
+    const rlist = document.getElementById('recent-list');
+    rlist.innerHTML = data.recent.map(r => {
+      const pf = r.payout - r.bet;
+      const hasResult = !!r.result;
+      return `<div style="padding:9px 12px;border-bottom:0.5px solid var(--border);font-size:12px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="flex:1">
+            <div style="font-weight:500">${r.venue || ''} ${r.race || ''}</div>
+            <div style="color:var(--muted);font-size:11px">${r.date}　グレード: ${r.grade || '-'}　結果: ${r.result || '未登録'}</div>
+          </div>
+          <div style="text-align:right">
+            <div style="color:${pf >= 0 ? '#0f6e56' : '#a32d2d'};font-weight:500">${pf >= 0 ? '+' : ''}${pf}円</div>
+            <div style="color:var(--muted);font-size:11px">${r.bet}円投資</div>
+          </div>
+        </div>
+        ${!hasResult ? `
+        <div style="display:flex;gap:6px;align-items:center;margin-top:8px" id="result-row-${r.id}">
+          <input type="number" id="f1-${r.id}" min="1" max="18" placeholder="1着" style="width:60px;font-size:12px;padding:4px;border:0.5px solid rgba(0,0,0,0.2);border-radius:6px">
+          <input type="number" id="f2-${r.id}" min="1" max="18" placeholder="2着" style="width:60px;font-size:12px;padding:4px;border:0.5px solid rgba(0,0,0,0.2);border-radius:6px">
+          <input type="number" id="f3-${r.id}" min="1" max="18" placeholder="3着" style="width:60px;font-size:12px;padding:4px;border:0.5px solid rgba(0,0,0,0.2);border-radius:6px">
+          <button onclick="submitResultById(${r.id}, '${r.date}', '${r.venue}', '${r.race}')" style="flex:1;background:#0a5d2e;color:white;border:none;padding:5px 8px;border-radius:6px;font-size:12px;cursor:pointer">登録</button>
+          <span id="rs-${r.id}" style="font-size:11px;color:var(--muted)"></span>
+        </div>` : ''}
+      </div>`;
+    }).join('') || '<div style="padding:16px;text-align:center;color:var(--muted)">まだデータがありません</div>';
+
+  } catch(e) {
+    console.error('統計取得失敗:', e);
+  }
+}
+
+let currentPrediction = {};
+
+async function submitResultById(predId, raceDate, venue, raceNum) {
+  const first  = parseInt(document.getElementById(`f1-${predId}`).value);
+  const second = parseInt(document.getElementById(`f2-${predId}`).value);
+  const third  = parseInt(document.getElementById(`f3-${predId}`).value);
+  const status = document.getElementById(`rs-${predId}`);
+
+  if (!first || !second || !third) {
+    status.textContent = '1〜3着を入力してください';
+    status.style.color = '#a32d2d';
+    return;
+  }
+
+  try {
+    const res = await fetch(`${SERVER}/result`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ race_date: raceDate, venue, race_num: raceNum, first, second, third })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+
+    const row = document.getElementById(`result-row-${predId}`);
+    row.innerHTML = `<span style="color:#0f6e56;font-size:12px">登録完了！　結果: ${first}-${second}-${third}</span>`;
+    setTimeout(loadStats, 500);
+  } catch(e) {
+    status.textContent = `エラー: ${e.message}`;
+    status.style.color = '#a32d2d';
+  }
+}
+
+async function submitResult() {
+  const first  = parseInt(document.getElementById('result-first').value);
+  const second = parseInt(document.getElementById('result-second').value);
+  const third  = parseInt(document.getElementById('result-third').value);
+
+  if (!first || !second || !third) {
+    document.getElementById('result-status').innerHTML = '<span style="color:#a32d2d">1〜3着をすべて入力してください</span>';
+    return;
+  }
+
+  try {
+    const res = await fetch(`${SERVER}/result`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        race_date: currentPrediction.race_date || new Date().toISOString().slice(0,10),
+        venue: currentPrediction.venue || '',
+        race_num: currentPrediction.race_num || '',
+        first, second, third
+      })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    document.getElementById('result-status').innerHTML = `<span style="color:#0f6e56">登録完了！結果: ${first}-${second}-${third}</span>`;
+  } catch(e) {
+    document.getElementById('result-status').innerHTML = `<span style="color:#a32d2d">エラー: ${e.message}</span>`;
+  }
+}
+
+async function scrapeUrl() {
+  const jcd = document.getElementById('venue-code').value;
+  const rno = document.getElementById('race-no').value;
+  const dateVal = document.getElementById('race-date').value;
+  const raceId  = document.getElementById('race-id').value.trim();
+
+  if (!raceId && (!jcd || !rno || !dateVal)) {
+    document.getElementById('err-msg').innerHTML = '<div class="err-box">競馬場・レース番号・日付を選択するか、race_idを直接入力してください</div>';
+    return;
+  }
+  document.getElementById('err-msg').innerHTML = '';
+
+  const venueNames = {
+    '01':'札幌','02':'函館','03':'福島','04':'新潟','05':'中山',
+    '06':'東京','07':'中京','08':'京都','09':'阪神','10':'小倉'
+  };
+  const venueName = venueNames[jcd] || '';
+
+  setStep(2);
+  document.getElementById('loading-msg').textContent = 'netkeibaから出走表・オッズを取得中...';
+  document.getElementById('loading-sub').textContent = 'AIが解析します（30〜60秒かかります）';
+
+  try {
+    const res = await fetch(`${SERVER}/scrape`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ rno, jcd, race_date: dateVal, race_id: raceId })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+
+    if (data.shutsuba_text) {
+      document.getElementById('shutsuba-input').value = data.shutsuba_text;
+      if (venueName) document.getElementById('venue-select').value = venueName;
+      if (rno && venueName) document.getElementById('race-meta').value = `${venueName}${rno}R`;
+    }
+    setStep(1);
+  } catch(e) {
+    setStep(1);
+    document.getElementById('err-msg').innerHTML = `<div class="err-box">データ取得エラー: ${e.message}<br><small>race_idが正しいか・サーバーが起動しているか確認してください</small></div>`;
+  }
+}
+
+const LOADING_MSGS = [
+  ['Claude AIが出走表を分析中...', '各馬の能力値を計算しています'],
+  ['騎手・斤量・距離適性を評価中...', '勝率と相性を分析しています'],
+  ['コース別有利不利を分析中...', '会場特性とポジション傾向を考慮中'],
+  ['勝率を算出中...', '全出走馬の総合スコアを計算しています'],
+  ['敗因シナリオを生成中...', '本命が負けるリスクを洗い出しています'],
+  ['買い目・金額を最適化中...', '期待値ベースで券種と金額を決定しています'],
+];
+
+async function generatePrediction() {
+  const text = document.getElementById('shutsuba-input').value.trim();
+  if (!text || text.length < 20) {
+    document.getElementById('err-msg').innerHTML = '<div class="err-box">出走表テキストを入力してください</div>';
+    return;
+  }
+  document.getElementById('err-msg').innerHTML = '';
+
+  setStep(3);
+  let idx = 0;
+  const msgEl = document.getElementById('loading-msg');
+  const subEl = document.getElementById('loading-sub');
+  msgEl.textContent = LOADING_MSGS[0][0];
+  subEl.textContent = LOADING_MSGS[0][1];
+  const timer = setInterval(() => {
+    idx = (idx + 1) % LOADING_MSGS.length;
+    msgEl.textContent = LOADING_MSGS[idx][0];
+    subEl.textContent = LOADING_MSGS[idx][1];
+  }, 3000);
+
+  const raceNoVal = document.getElementById('race-no').value;
+  const metaVal   = document.getElementById('race-meta').value || '';
+  const metaMatch = metaVal.match(/(\d+)\s*R/i);
+  const raceNumFromForm = raceNoVal
+    ? raceNoVal + 'R'
+    : (metaMatch ? metaMatch[1] + 'R' : '');
+  currentPrediction = {
+    race_date: document.getElementById('race-date').value,
+    venue: document.getElementById('venue-select').value || metaVal,
+    race_num: raceNumFromForm
+  };
+
+  try {
+    const res = await fetch(`${SERVER}/predict`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        shutsuba_text: text,
+        venue: currentPrediction.venue,
+        weather: document.getElementById('weather-cond').value,
+        race_date: currentPrediction.race_date,
+        race_num: currentPrediction.race_num
+      })
+    });
+    clearInterval(timer);
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    renderResult(data);
+    setStep(4);
+  } catch(e) {
+    clearInterval(timer);
+    setStep(1);
+    document.getElementById('err-msg').innerHTML = `<div class="err-box">エラー: ${e.message}<br><small>サーバー・APIキーを確認してください</small></div>`;
+  }
+}
+
+function gradeClass(g) {
+  if (!g) return '';
+  return g.startsWith('S') ? 'grade-s' : g.startsWith('A') ? 'grade-a' : 'grade-b';
+}
+
+// 馬番から枠番を推定（最大18頭立ての近似）
+function wakuFromUma(num) {
+  const n = Number(num) || 1;
+  return Math.min(8, Math.ceil(n / 2));
+}
+function wakuClass(num) { return `waku-${wakuFromUma(num)}`; }
+
+function renderResult(d) {
+  const markCol = {'◎':'m-hon','○':'m-tai','▲':'m-san'};
+
+  const honmeiHTML = (d.honmei||[]).map(h => `
+    <div class="honmei-row">
+      <span class="mark ${markCol[h.mark]||''}">${h.mark}</span>
+      <span class="uma-badge ${wakuClass(h.num)}">${h.num}</span>
+      <div style="flex:1">
+        <div class="hname">${h.name}</div>
+        <div class="hinfo">${h.sex||''}　斤量${h.weight||'—'}　${h.jockey||''}</div>
+      </div>
+      <span class="wpct">${h.pct}%</span>
+      <span class="pop">${h.pop}</span>
+    </div>`).join('');
+
+  const shutsubaRows = (d.shutsuba||[]).map(r => `
+    <tr>
+      <td><span class="uma-badge ${wakuClass(r.num)}" style="width:24px;height:24px;font-size:12px">${r.num}</span></td>
+      <td class="name-cell">${r.name||''}</td>
+      <td>${r.sex||'-'}</td>
+      <td>${r.weight||'-'}</td>
+      <td>${r.jockey||'-'}</td>
+      <td>${r.odds != null ? Number(r.odds).toFixed(1) : '-'}</td>
+      <td>${r.pop || '-'}</td>
+      <td>${r.prevRank != null ? r.prevRank+'着' : '-'}</td>
+      <td>${r.horseWeight || '-'}</td>
+    </tr>`).join('');
+
+  const haiin = (d.haiin||[]).map((h,i) => `
+    <div class="haiin-item"><span class="haiin-num">${i+1}.</span>${h}</div>`).join('');
+
+  const g = d.grade || {};
+  const venueLabel = currentPrediction.venue || '';
+  const raceLabel  = currentPrediction.race_num || '';
+  const hasRaceInfo = !!(venueLabel || raceLabel);
+  const stickyTopBar = hasRaceInfo
+    ? `<div class="race-sticky-bar">🐴 ${venueLabel} ${raceLabel}</div>` : '';
+  const raceBanner = `<div class="race-banner-orange">🐴 ${venueLabel} ${raceLabel}</div>`;
+  const warnBanner = hasRaceInfo
+    ? `<div class="kaikata-warn">⚠️ ${venueLabel} ${raceLabel} の買い目です</div>`
+    : `<div class="kaikata-warn">⚠️ 買い目を確認してから投票してください</div>`;
+
+  let kaikata = '';
+  if (d.miken) {
+    kaikata = `${raceBanner}<div class="card-head amber">私はこう買う　p1 ${d.honmeiPct}%</div>${warnBanner}
+      <div class="miken-msg">今回は購入見送り</div>`;
+  } else {
+    const rows = (d.kaikata||[]).map(r => `<tr>
+      <td>${r.kenshu}</td><td>${r.kumiawase}</td><td>${r.odds}</td>
+      <td style="text-align:center">${r.kuchi}</td>
+      <td style="text-align:right">${r.kin}円</td>
+      <td style="font-size:11px;color:#999">${r.konkyo}</td>
+    </tr>`).join('');
+    const total = (d.kaikata||[]).reduce((s,r) => s+(Number(r.kin)||0), 0);
+    kaikata = `${raceBanner}<div class="card-head amber">私はこう買う　予算 ${d.budget||''}</div>${warnBanner}
+    <div class="kaikata-wrap"><table class="ktable">
+      <thead><tr><th>券種</th><th>組合せ</th><th>想定オッズ</th><th>口数</th><th>金額</th><th>根拠</th></tr></thead>
+      <tbody>${rows}
+        <tr class="total-row"><td colspan="4" style="text-align:right">合計</td><td style="text-align:right">${total}円</td><td></td></tr>
+      </tbody>
+    </table></div>`;
+  }
+
+  document.getElementById('result-content').innerHTML = `
+    ${stickyTopBar}
+    <div class="result-header">
+      <div class="result-race">${d.raceName||''}　${d.venue||''}　${d.raceNum||''}</div>
+      <div class="result-meta">${d.raceType||''}　${d.weather||''}</div>
+    </div>
+    <div class="grade-row">
+      <div class="grade-pill">単勝：<span class="${gradeClass(g.tan)}">${g.tan||'-'}</span></div>
+      <div class="grade-pill">馬連：<span class="${gradeClass(g.baren)}">${g.baren||'-'}</span></div>
+      <div class="grade-pill">3連単：<span class="${gradeClass(g.sanren)}">${g.sanren||'-'}</span></div>
+    </div>
+    <div class="pct-banner">◎勝率(p1)：<span class="pct-val">${d.honmeiPct||'—'}%</span>
+      ${d.race_pattern ? `<span style="margin-left:12px;font-size:12px;padding:3px 10px;border-radius:10px;font-weight:500;background:${d.race_pattern==='B'?'#0a5d2e':d.race_pattern==='C'?'#854f0b':'#1d9e75'};color:white">
+        ${d.race_pattern==='A'?'パターンA：人気通り（少額)':d.race_pattern==='B'?'パターンB：穴狙い（積極買い）':'パターンC：混戦（様子見）'}
+      </span>` : ''}
+    </div>
+    <div class="card"><div class="card-head">最終予想</div>${honmeiHTML}</div>
+    <div class="card">
+      <div class="card-head teal">出走表</div>
+      <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
+        <table class="shutsuba-table">
+          <thead><tr><th>馬番</th><th style="text-align:left">馬名</th><th>性齢</th><th>斤量</th><th>騎手</th><th>オッズ</th><th>人気</th><th>前走</th><th>馬体重</th></tr></thead>
+          <tbody>${shutsubaRows}</tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card"><div class="card-head gray">敗因シナリオ</div>${haiin}</div>
+    <div class="card">${kaikata}</div>`;
+}
+</script>
+</body>
+</html>
